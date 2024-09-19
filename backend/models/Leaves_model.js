@@ -40,7 +40,7 @@ const model = (sequelize) => {
         ]
     };
 
-    return sequelize.define("Task", attributes, options);
+    return sequelize.define("Leaves", attributes, options);
 }
 
 module.exports = model;
