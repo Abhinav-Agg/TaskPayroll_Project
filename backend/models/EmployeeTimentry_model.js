@@ -2,34 +2,26 @@ const { Sequelize, DataTypes } = require("sequelize");
 
 const model = (sequelize) => {
     const attributes = {
-        SalaryId: {
+        TimeentryId: {
             type: DataTypes.BIGINT,
             allowNull: false,
             autoIncrement: true,
             primaryKey: true
         },
+        TimeIn: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        TimeOut: {
+            type: DataTypes.BIGINT,
+            allowNull: false
+        },
         Empnumber: {
             type: DataTypes.BIGINT,
             allowNull: false
         },
-        CTC: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        Basic: {
-            type: DataTypes.BIGINT,
-            allowNull: false
-        },
-        HRA: {
-            type: DataTypes.BIGINT,
-            allowNull: false
-        },
-        DA: {
-            type: DataTypes.BIGINT,
-            allowNull: false
-        },
-        PF: {
-            type: DataTypes.BIGINT
+        DayHrs: {
+            type: DataTypes.STRING
         },
         IsDeleted: {
             type: DataTypes.TINYINT
@@ -41,10 +33,18 @@ const model = (sequelize) => {
         // don't add the timestamp attributes (updatedAt, createdAt)
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        updatedAt: 'updated_at',
+        indexes: [
+            // Create a unique index on email
+            {
+                name : 'empnumber_index',
+                unique : true,
+                fields: ['Empnumber']
+            }
+        ]
     };
 
-    return sequelize.define("Salary", attributes, options);
+    return sequelize.define("EmployeeTimeEntry", attributes, options);
 }
 
 module.exports = model;

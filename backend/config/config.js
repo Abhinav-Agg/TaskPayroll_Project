@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const {USER, PASSWORD, DB, HOST, DIALECT, SQL_PORT} = process.env;
 
 module.exports = {
@@ -6,7 +8,7 @@ module.exports = {
         "password": PASSWORD,
         "database": DB,
         "host": HOST,
-        "dialect": DIALECT,
+        "dialect": process.env.DIALECT,
         "SQL_PORT": SQL_PORT
     },
     production: {
