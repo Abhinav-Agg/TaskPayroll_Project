@@ -41,9 +41,13 @@ module.exports = {
       }
     });
 
-    await queryInterface.addIndex('Task', ['Empnumber', "TaskName"], {
-      name: 'taskname_empnumber_index',
+    await queryInterface.addIndex('Task', ['Empnumber'], {
+      name: 'empnumber_index',
       unique: true, // To ensure the index is unique
+    });
+
+    await queryInterface.addIndex('Task', ['TaskName'], {
+      name: 'TaskName_nonunique_index', // Optional: name of the index
     });
   },
 
