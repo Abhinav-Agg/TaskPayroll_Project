@@ -21,7 +21,10 @@ const model = (sequelize) => {
         },
         IsDeleted: {
             type: DataTypes.TINYINT
-        }
+        },
+        DeleteBy: {
+            type: DataTypes.BIGINT
+        },
     }
 
     const options = {
@@ -33,7 +36,7 @@ const model = (sequelize) => {
         indexes: [
             // Create a unique index on email
             {
-                name : 'taskname_empnumber_index',
+                name: 'taskname_empnumber_index',
                 fields: ['Empnumber', "TaskName"]
             }
         ]

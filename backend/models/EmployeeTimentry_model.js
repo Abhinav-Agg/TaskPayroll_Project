@@ -23,8 +23,24 @@ const model = (sequelize) => {
         DayHrs: {
             type: DataTypes.STRING
         },
+        TimeEntrySubmitted: {
+            type: DataTypes.TINYINT
+        },
+        // Both columns value we are using may be EmpId or userId
+        CreatedBy: {
+            type: DataTypes.BIGINT,
+        },
+        ModifiedBy: {
+            type: DataTypes.BIGINT,
+        },
+        ModifiedReason: {
+            type: DataTypes.STRING,
+        },
         IsDeleted: {
             type: DataTypes.TINYINT
+        },
+        DeletedBy : {
+          type: DataTypes.BIGINT
         }
     }
 
@@ -37,8 +53,8 @@ const model = (sequelize) => {
         indexes: [
             // Create a unique index on email
             {
-                name : 'empnumber_index',
-                unique : true,
+                name: 'empnumber_index',
+                unique: true,
                 fields: ['Empnumber']
             }
         ]

@@ -31,6 +31,16 @@ const model = (sequelize) => {
         PF: {
             type: DataTypes.BIGINT
         },
+        // Both columns value we are using may be EmpId or userId
+        CreatedBy : {
+            type : DataTypes.BIGINT,
+        },
+        ModifiedBy : {
+            type : DataTypes.BIGINT,
+        },
+        ModifyReason : {
+            type :  DataTypes.STRING
+        },
         IsDeleted: {
             type: DataTypes.TINYINT
         }

@@ -16,9 +16,24 @@ const model = (sequelize) => {
             type: DataTypes.BIGINT,
             allowNull: false
         },
-        Days: {
-            type: DataTypes.INTEGER,
+        LeavesGranted: {
+            type: Sequelize.INTEGER,
             allowNull: false
+        },
+        LeavesApproved: {
+            type: Sequelize.INTEGER
+        },
+        // Leave Days -> Its used how much days Employee applied for leaves.
+        LeaveDays: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
+        // Both columns value we are using may be EmpId or userId
+        CreatedBy: {
+            type: DataTypes.BIGINT,
+        },
+        ModifiedBy: {
+            type: DataTypes.BIGINT,
         },
         IsDeleted: {
             type: DataTypes.TINYINT
@@ -34,7 +49,7 @@ const model = (sequelize) => {
         indexes: [
             // Create a unique index on email
             {
-                name : 'empnumber_index',
+                name: 'empnumber_index',
                 fields: ['Empnumber']
             }
         ]
