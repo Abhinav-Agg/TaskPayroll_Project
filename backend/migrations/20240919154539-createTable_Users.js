@@ -19,7 +19,7 @@ module.exports = {
         allowNull: false
       },
       UserLogin: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         allowNull: false
       },
       Password: {
