@@ -31,8 +31,24 @@ const model = (sequelize) => {
                 key: 'UserId' // Target model's primary key column (replace if different)
             }
         },
+        EmpRole : {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        ModifiedAt : {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        ModifiedBy : {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         IsDeleted: {
             type: DataTypes.TINYINT
+        },
+        DeletedBy : {
+            type: DataTypes.STRING,
+            allowNull: false
         },
         IsActive: {
             type: DataTypes.TINYINT
