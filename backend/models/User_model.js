@@ -36,6 +36,15 @@ const model = (sequelize) => {
         },
         IsActive: {
             type: DataTypes.TINYINT
+        },
+        DeletedBy: {
+            type: DataTypes.BIGINT
+        },
+        ModifiedAt: {
+            type: DataTypes.DATE
+        },
+        ModifiedBy: {
+            type: DataTypes.BIGINT
         }
     }
 

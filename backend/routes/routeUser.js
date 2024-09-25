@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { login } = require("../controllers/user_controller");
 
-router.route("/test").post((req,res) => {
-    res.send("its working");
-});
+// Secure Routes
+router.route("/login").post(login);
 
 module.exports = router;
