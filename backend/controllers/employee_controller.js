@@ -1,15 +1,16 @@
 const db = require("../db/dbModel");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/AsyncHandlerWrapper");
-const { createUser } = require("./user_controller");
+const { createUser, addUserRole } = require("./user_controller");
 const ApiResponse = require("../utils/ApiResponse");
 const { where, Op } = require("sequelize");
 
 const createEmployee = asyncHandler(async (req, res) => {
-    console.log(req);
-    let { fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation } = req.body;
+    let { fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation, empRole } = req.body;
 
-    let reqsVal = [fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation].some(value => value === "");
+    let reqsVal = [fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation, empRole].some(value => value === "");
+
+    if (reqsVal) throw new ApiError(401, "field empty");
 
     let existingEmp = await db.Employee.findOne({
         where:
@@ -23,15 +24,14 @@ const createEmployee = asyncHandler(async (req, res) => {
 
     if (existingEmp) throw new ApiError(401, "Employee already exists")
 
-    if (reqsVal) throw new ApiError(401, "field empty");
-
     let empObj = {
         FullName : fullName,
         Empnumber : empNumber,
         Email : email,
         Address : address,
         EmpDepartment : empDepartment,
-        EmpDesignation : empDesignation
+        EmpDesignation : empDesignation,
+        IsActive : 1
     }
 
     let userObj = {
@@ -41,16 +41,26 @@ const createEmployee = asyncHandler(async (req, res) => {
         userPassword
     }
 
+    // Get UserDeatils
     let newUserDetail = await createUser(userObj);
 
-    empObj.UserId = newUserDetail.UserId;
-    // need to add user role table with userid and add that role id in employee table.
+    // Get UserRoleDetails
+    let userRoleDetails = await addUserRole(newUserDetail.UserId, empRole);
 
+    empObj.UserId = newUserDetail.UserId;
+    
+    empObj.EmpRole = userRoleDetails.Role;
+
+    // Get EmpDetails with UserRole and UserId
     let empDetail = await db.Employee.create(empObj);
 
-    if(!empDetail) throw new ApiError(401, "Internal error");
+    if(!empDetail){
+        let deleteUser = await deleteUser(newUserDetail.UserId);
+        
+        throw new ApiError(401, "Internal error");
+    } 
 
-    return res.status(200).json(new ApiResponse(201, "Employee Created successfully",));
+    return res.status(200).json(new ApiResponse(201, "Employee Created successfully", empDetail));
 });
 
 const updateEmployee = asyncHandler(async (req, res) => {

@@ -38,7 +38,8 @@ const createUser = async (userObj) => {
             Fullname: fullName,
             UserEmail: email,
             UserLogin: userLogin,
-            Password: await hashPassword(userPassword)
+            Password: await hashPassword(userPassword),
+            IsActive : 1
         });
 
         if (!newUserDetail) throw new ApiError(401, "Internal error");
@@ -74,14 +75,36 @@ const changePassword = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(201, "Password Changed Successfully", updateUserDetail));
 });
 
-const userRole = asyncHandler(async (req, res) => {
+// This delete User function calls in catch function.
+const deleteUser = async(userId) => {
+    try{
+        let deleteUserDetails = await db.Users.destroy({where : {UserId : userId}});
+        return deleteUserDetails;
+    }
+    catch(error){
+        throw new ApiError(500, error.message);
+    }
+}
 
-});
+const addUserRole = async (userId, role) => {
+    try {
+        let roleDetails = await db.UserRole.create({UserId : userId, Role : role});
+
+        return roleDetails;
+
+    } catch (error) {
+        deleteUser(userId);
+        throw new ApiError(500, error.message)
+    }
+};
+
+
 
 // Need to add code for logout, refresh-token, updateAccountInfo(if email would be change), login if user wnats to change the login, GetCurrentUserDetails.
 
 module.exports = { 
     login, 
     createUser,
-    changePassword 
+    changePassword,
+    addUserRole 
 };
