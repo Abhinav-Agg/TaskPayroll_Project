@@ -32,23 +32,19 @@ const model = (sequelize) => {
             }
         },
         EmpRole : {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.STRING
         },
         ModifiedAt : {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.STRING
         },
         ModifiedBy : {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.STRING
         },
         IsDeleted: {
             type: DataTypes.TINYINT
         },
         DeletedBy : {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.STRING
         },
         IsActive: {
             type: DataTypes.TINYINT
