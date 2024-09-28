@@ -1,7 +1,7 @@
 const db = require("../db/dbModel");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/AsyncHandlerWrapper");
-const { createUser, addUserRole } = require("./user_controller");
+const { createUser, createUserRole } = require("./user_controller");
 const ApiResponse = require("../utils/ApiResponse");
 const { where, Op } = require("sequelize");
 
@@ -45,7 +45,7 @@ const createEmployee = asyncHandler(async (req, res) => {
     let newUserDetail = await createUser(userObj);
 
     // Get UserRoleDetails
-    let userRoleDetails = await addUserRole(newUserDetail.UserId, empRole);
+    let userRoleDetails = await createUserRole(newUserDetail.UserId, empRole);
 
     empObj.UserId = newUserDetail.UserId;
     

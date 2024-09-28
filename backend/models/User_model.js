@@ -18,7 +18,7 @@ const model = (sequelize) => {
             allowNull: false
         },
         UserLogin : {
-            type : DataTypes.INTEGER,
+            type : DataTypes.STRING,
             allowNull : false
         },
         Password : {

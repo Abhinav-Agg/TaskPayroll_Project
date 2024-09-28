@@ -8,12 +8,26 @@ const { where } = require('sequelize');
 
 const generateToken = (userDetail) => {
     const payload = {
-        fullName : userDetail.FullName,
-        email : userDetail.Emails
+        userId : userDetail.UserId,
+        fullName : userDetail.Fullname,
+        email : userDetail.UserEmail
     }
 
     const jwtOtions = {
         expiresIn : "1m"
+    }
+
+    return jwt.sign(payload, secretKey, jwtOtions);
+}
+
+const generateRefreshToken = (userDetail) => {
+    const payload = {
+        userId : userDetail.UserId,
+        refreshToken : "RefreshTokenKey"
+    }
+
+    const jwtOtions = {
+        expiresIn : "1d"
     }
 
     return jwt.sign(payload, secretKey, jwtOtions);
@@ -29,6 +43,16 @@ const verifyPassword = async (enteredPassword, userPassword) => {
     let validPassword = await bcrypt.compare(enteredPassword, userPassword);
     return validPassword;
 }
+
+// This function returns the middleware output.
+const checkMiddlewareOutput = (req) => {
+    if(req.TokenError) return req.TokenError;
+
+    if(req.UserNotExistError) return req.UserNotExistError;
+
+    return req.user;
+}
+
 
 const checkEmpNumberWithUserRoleAndExists = asyncHandler(async (empNumber, userId) => {
     // Here we check EmpNumber is exist or not. Get EmpId and Userid. 
@@ -51,5 +75,7 @@ module.exports = {
     generateToken,
     hashPassword,
     verifyPassword,
-    checkEmpNumberWithUserRoleAndExists
+    checkEmpNumberWithUserRoleAndExists,
+    generateRefreshToken,
+    checkMiddlewareOutput
 }
