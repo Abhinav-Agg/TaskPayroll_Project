@@ -67,6 +67,6 @@ const updateEmployee = asyncHandler(async (req, res) => {
     let {} = req.body;
 });
 
-// updat Employee
+// update Employee
 
 module.exports = { createEmployee };
