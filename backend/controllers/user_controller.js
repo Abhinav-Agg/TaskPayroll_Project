@@ -222,11 +222,11 @@ const reGenerateAccessTokenRefresh = asyncHandler(async (req, res) => {
 // This api returns the current user details with error.
 const currentUserDetails = asyncHandler(async(req, res) => {
 
-    let userResp = checkMiddlewareOutput(req);
+    let middlewareUserResp = checkMiddlewareOutput(req);
 
-    if(userResp.name === 'TokenExpiredError') throw new ApiError(401, userResp.message);
+    if(middlewareUserResp.name === 'TokenExpiredError') throw new ApiError(401, middlewareUserResp.message);
 
-    return res.status(200).json(new ApiResponse(201, "User Details", userResp));
+    return res.status(200).json(new ApiResponse(201, "User Details", middlewareUserResp));
 });
 
 
