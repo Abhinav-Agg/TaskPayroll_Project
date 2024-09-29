@@ -100,13 +100,19 @@ const updateEmployeeInfo = asyncHandler(async (req, res) => {
         }
     );
 
+    let updateUserStatus = await db.Users.update({UserEmail : email, Fullname : fullName},
+        {
+            where: {UserId}
+        }
+    );
+
     let updateRoleStatus = await db.UserRole.update({Role : empRole},
         {
             where: { UserId }
         }
     );
 
-    if((updateEmpStatus[0] && updateRoleStatus[0]) === 1) return res.status(200).json(new ApiResponse(201, "Info Updated Sucessfully"));
+    if((updateEmpStatus[0] && updateRoleStatus[0] && updateUserStatus[0]) === 1) return res.status(200).json(new ApiResponse(201, "Info Updated Sucessfully"));
 });
 
 module.exports = {

@@ -40,9 +40,6 @@ const model = (sequelize) => {
         DeletedBy: {
             type: DataTypes.BIGINT
         },
-        ModifiedAt: {
-            type: DataTypes.DATE
-        },
         ModifiedBy: {
             type: DataTypes.BIGINT
         }

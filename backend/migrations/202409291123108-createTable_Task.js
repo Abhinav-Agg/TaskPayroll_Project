@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up (queryInterface, Sequelize) {
     await queryInterface.createTable('Task', {
       TaskId: {
         type: Sequelize.BIGINT,
@@ -10,12 +10,16 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true
       },
+      Empnumber: {
+        type: Sequelize.BIGINT,
+        allowNull: false
+      },
       TaskName: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      Empnumber: {
-        type: Sequelize.BIGINT,
+      TaskDescription: {
+        type: Sequelize.STRING(1000),
         allowNull: false
       },
       Hours: {
@@ -27,32 +31,32 @@ module.exports = {
       DeleteBy: {
         type: Sequelize.BIGINT
       },
-
+      CreatedBy: {
+        type: Sequelize.BIGINT
+      },
+      ModifiedBy: {
+        type: Sequelize.BIGINT
+      },
       // Add createdAt and updatedAt columns
-      created_at: {
+      CreatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       },
-      updated_at: {
+      UpdatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       }
     });
 
-    await queryInterface.addIndex('Task', ['Empnumber'], {
-      name: 'empnumber_index',
-      unique: true, // To ensure the index is unique
-    });
-
-    await queryInterface.addIndex('Task', ['TaskName'], {
-      name: 'TaskName_nonunique_index', // Optional: name of the index
+    await queryInterface.addIndex('Task', ['TaskName', "Empnumber"], {
+      name: 'TaskName_Empnumber_nonunique_index', // Optional: name of the index
     });
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.removeIndex('Task', 'taskname_empnumber_index');
+  async down (queryInterface, Sequelize) {
+    await queryInterface.removeIndex('Task', 'TaskName_Empnumber_nonunique_index');
 
     // Drop the Users table
     await queryInterface.dropTable('Task');

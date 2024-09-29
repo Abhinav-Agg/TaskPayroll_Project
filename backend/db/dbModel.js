@@ -1,3 +1,4 @@
+const { Sequelize } = require("sequelize");
 const sequelize = require("./dbConfig");
 const Users = require('../models/User_model');
 const Employee = require('../models/Employee_model');
@@ -16,5 +17,14 @@ db.Leaves = Leaves(sequelize);
 db.Task = Task(sequelize);
 db.EmployeeTimentry = EmployeeTimentry(sequelize);
 db.UserRole = UserRole(sequelize);
+
+Object.keys(db).forEach(modelName => {
+    if (db[modelName].associate) {
+        db[modelName].associate(db);
+    }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
 module.exports = db;
