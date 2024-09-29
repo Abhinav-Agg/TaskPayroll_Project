@@ -13,8 +13,8 @@ const model = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        Empnumber : {
-            type : DataTypes.BIGINT
+        Empnumber: {
+            type: DataTypes.BIGINT
         },
         Email: {
             type: DataTypes.STRING,
@@ -31,19 +31,16 @@ const model = (sequelize) => {
                 key: 'UserId' // Target model's primary key column (replace if different)
             }
         },
-        EmpRole : {
+        EmpRole: {
             type: DataTypes.STRING
         },
-        ModifiedAt : {
-            type: DataTypes.STRING
-        },
-        ModifiedBy : {
+        ModifiedBy: {
             type: DataTypes.STRING
         },
         IsDeleted: {
             type: DataTypes.TINYINT
         },
-        DeletedBy : {
+        DeletedBy: {
             type: DataTypes.STRING
         },
         IsActive: {
@@ -68,14 +65,24 @@ const model = (sequelize) => {
         indexes: [
             // Create a unique index on email
             {
-                name : 'userId_empnumber_email_index',
+                name: 'userId_empnumber_email_index',
                 unique: true,
                 fields: ['Email', "UserId", "Empnumber"]
             }
         ]
     };
 
-    return sequelize.define("Employee", attributes, options);
+    const Employee = sequelize.define("Employee", attributes, options);
+
+    // By using associations, we inform Sequelize that an Employee can have many entries in another table, which is the Task table in this case.
+    // This means a single Employee can be associated with multiple Task entries. This setup allows Sequelize to handle joins correctly even if foreign key constraints are not enforced in the database schema.
+    Employee.associate = (models) => {
+        Employee.hasMany(models.Task, { foreignKey: 'Empnumber', sourceKey: 'Empnumber' });
+    };
+    // Here, we define a foreign key in Sequelize, but it does not impact the actual database schema.
+    // This association is used for joins and ensures that Sequelize uses the 'Empnumber' column for both tables during insertion and updates.
+
+    return Employee;
 }
 
 module.exports = model;

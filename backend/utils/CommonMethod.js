@@ -14,7 +14,7 @@ const generateToken = (userDetail) => {
     }
 
     const jwtOtions = {
-        expiresIn : "1m"
+        expiresIn : "30m"
     }
 
     return jwt.sign(payload, secretKey, jwtOtions);
@@ -46,6 +46,7 @@ const verifyPassword = async (enteredPassword, userPassword) => {
 
 // This function returns the middleware output.
 const checkMiddlewareOutput = (req) => {
+
     if(req.TokenError) return req.TokenError;
 
     if(req.UserNotExistError) return req.UserNotExistError;
@@ -54,28 +55,20 @@ const checkMiddlewareOutput = (req) => {
 }
 
 
-const checkEmpNumberWithUserRoleAndExists = asyncHandler(async (empNumber, userId) => {
-    // Here we check EmpNumber is exist or not. Get EmpId and Userid. 
-    // We check userrole with the given userId. And Then allow to save and edit. 
-    // With UserId we validate the userRole.
-    let empDetails = await db.Employee.findOne({where : {Empnumber : empNumber}});
+const validateEmpwithEmpNumber = async (empNumber) => {
 
-    if(!empDetails) throw new ApiError(401, "This employee not found");
+    let empDetailsInstances = await db.Employee.findOne({where : {Empnumber : empNumber}});
+    
+    if(!empDetailsInstances) return res.status(400).send({"ErrorMsg" : "This employee not found"});
 
-    let userRoleDetails = await db.UserRole.findOne({where : {UserId : userId}});
-
-    if(!userRoleDetails) throw new ApiError(401, "This user not found");
-
-    if(userRoleDetails.Role === "Employee") throw new ApiError(401, "you don't have access to add details");
-
-    return {...userRoleDetails, ...empDetails};
-});
+    return empDetailsInstances;
+};
 
 module.exports = {
     generateToken,
     hashPassword,
     verifyPassword,
-    checkEmpNumberWithUserRoleAndExists,
+    validateEmpwithEmpNumber,
     generateRefreshToken,
     checkMiddlewareOutput
 }
