@@ -14,13 +14,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Security Routes
-app.use("/api/v1/admin", userRouter);
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1/user/admin", userRouter);
+app.use("/api/v1/auth/user", userRouter);
 
 // routes
 app.use(getLoggedInUserDetails);
-app.use("/api/v1/employee", empRouter);
-app.use("/api/v1/getuser", userRouter);
+app.use("/api/v1/emp/admin", empRouter);
+app.use("/api/v1/user", userRouter);
 
 
 module.exports = app;

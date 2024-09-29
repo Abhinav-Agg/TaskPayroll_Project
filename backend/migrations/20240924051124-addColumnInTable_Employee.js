@@ -8,11 +8,6 @@ module.exports = {
       allowNull: true
     });
 
-    await queryInterface.addColumn('Employee', 'ModifiedAt', {
-      type: Sequelize.DATE,
-      allowNull: true
-    });
-
     await queryInterface.addColumn('Employee', 'ModifiedBy', {
       type: Sequelize.BIGINT,
       allowNull: true
@@ -27,7 +22,6 @@ module.exports = {
   async down (queryInterface, Sequelize) {
     // Remove the column 'description' if the migration is rolled back
     await queryInterface.removeColumn('Employee', 'EmpRole');
-    await queryInterface.removeColumn('Employee', 'ModifiedAt');
     await queryInterface.removeColumn('Employee', 'ModifiedBy');
     await queryInterface.removeColumn('Employee', 'DeletedBy');
   }

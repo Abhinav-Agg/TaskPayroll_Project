@@ -34,9 +34,6 @@ const model = (sequelize) => {
         EmpRole : {
             type: DataTypes.STRING
         },
-        ModifiedAt : {
-            type: DataTypes.STRING
-        },
         ModifiedBy : {
             type: DataTypes.STRING
         },
