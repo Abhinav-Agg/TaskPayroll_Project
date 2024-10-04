@@ -9,12 +9,10 @@ const model = (sequelize) => {
             primaryKey: true
         },
         TimeIn: {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.STRING
         },
         TimeOut: {
-            type: DataTypes.BIGINT,
-            allowNull: false
+            type: DataTypes.STRING
         },
         Empnumber: {
             type: DataTypes.BIGINT,

@@ -14,7 +14,7 @@ const generateToken = (userDetail) => {
     }
 
     const jwtOtions = {
-        expiresIn : "30m"
+        expiresIn : "10m"
     }
 
     return jwt.sign(payload, secretKey, jwtOtions);
@@ -27,7 +27,7 @@ const generateRefreshToken = (userDetail) => {
     }
 
     const jwtOtions = {
-        expiresIn : "1d"
+        expiresIn : "30m"
     }
 
     return jwt.sign(payload, secretKey, jwtOtions);
@@ -54,6 +54,15 @@ const checkMiddlewareOutput = (req) => {
     return req.user;
 }
 
+const findEmpDetail = async (userId) => {
+
+    const empDetail = await db.Employee.findOne({where : {UserId : userId}});
+
+    let checkEmpDetail = (!empDetail) ? {ErrorMsg : "Employee Not Found"} : empDetail;
+
+    return checkEmpDetail;
+}
+
 
 const validateEmpwithEmpNumber = async (empNumber) => {
 
@@ -70,5 +79,6 @@ module.exports = {
     verifyPassword,
     validateEmpwithEmpNumber,
     generateRefreshToken,
-    checkMiddlewareOutput
+    checkMiddlewareOutput,
+    findEmpDetail
 }
