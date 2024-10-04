@@ -10,18 +10,16 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true
       },
-      TimeIn: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      TimeOut: {
-        type: Sequelize.BIGINT,
-        allowNull: false
-      },
       Empnumber: {
         type: Sequelize.BIGINT,
         allowNull: false
       },
+      TimeIn: {
+        type: Sequelize.STRING
+      },
+      TimeOut: {
+        type: Sequelize.STRING
+      },      
       DayHrs: {
         type: Sequelize.STRING
       },
@@ -31,11 +29,18 @@ module.exports = {
       CreatedBy: {
         type: Sequelize.BIGINT
       },
+      Created_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+      },
+      Updated_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+      },
       ModifiedBy: {
         type: Sequelize.BIGINT
-      },
-      ModifiedReason: {
-        type: Sequelize.STRING
       },
       IsDeleted: {
         type: Sequelize.TINYINT
@@ -43,23 +48,14 @@ module.exports = {
       DeletedBy : {
         type: Sequelize.BIGINT
       },
-
-      // Add createdAt and updatedAt columns
-      created_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
-      },
-      updated_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
+      ModifiedReason: {
+        type: Sequelize.STRING
       }
+      
     });
 
     await queryInterface.addIndex('EmployeeTimeEntry', ['Empnumber'], {
-      name: 'empnumber_index',
-      unique: true, // To ensure the index is unique
+      name: 'empnumber_index'
     });
   },
 
