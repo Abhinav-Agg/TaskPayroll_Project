@@ -4,13 +4,16 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require('./AsyncHandlerWrapper');
 const db = require('../db/dbModel');
 const ApiError = require('./ApiError');
+const { v4: uuidv4 } = require('uuid');
 const { where } = require('sequelize');
 
 const generateToken = (userDetail) => {
     const payload = {
         userId : userDetail.UserId,
         fullName : userDetail.Fullname,
-        email : userDetail.UserEmail
+        email : userDetail.UserEmail,
+        iat: Math.floor(Date.now() / 1000),
+        jti: uuidv4()
     }
 
     const jwtOtions = {
@@ -23,7 +26,7 @@ const generateToken = (userDetail) => {
 const generateRefreshToken = (userDetail) => {
     const payload = {
         userId : userDetail.UserId,
-        refreshToken : "RefreshTokenKey"
+        refreshToken: uuidv4()
     }
 
     const jwtOtions = {

@@ -36,8 +36,9 @@ const login = asyncHandler(async (req, res) => {
     );
 
     const options = {
-        httpOnly: true,
-        secure: true
+        httpOnly: true, // Prevents JavaScript access
+        secure: true, // Ensures cookie is sent over HTTPS
+        sameSite: 'Strict' // Prevents cross-site request forgery
     }
 
     res.setHeader("Authorization", `Bearer ${token}`);
@@ -206,8 +207,9 @@ const reGenerateAccessTokenRefresh = asyncHandler(async (req, res) => {
     );
 
     const options = {
-        httpOnly: true,
-        secure: true
+        httpOnly: true, // Prevents JavaScript access
+        secure: true, // Ensures cookie is sent over HTTPS
+        sameSite: 'Strict' // Prevents cross-site request forgery
     }
 
     res.setHeader("Authorization", `Bearer ${regenerateAccessToken}`);
