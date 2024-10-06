@@ -193,7 +193,7 @@ const reGenerateAccessTokenRefresh = asyncHandler(async (req, res) => {
     if (!getUserDetail) throw new ApiError(401, "User not found");
 
     // Here we validate the refresh token from db.
-    if (getUserDetail.RefreshToken !== refreshToken) throw new ApiError(401, "Unauthorized User tried Access");
+    if (getUserDetail.RefreshToken !== refreshToken) throw new ApiError(401, "Unauthorized User");
 
     let regenerateRefreshToken = generateRefreshToken(getUserDetail);
     let regenerateAccessToken = generateToken(getUserDetail);
@@ -222,13 +222,17 @@ const reGenerateAccessTokenRefresh = asyncHandler(async (req, res) => {
 });
 
 // This api returns the current user details with error.
-const currentUserDetails = asyncHandler(async(req, res) => {
+const currentUserDetails = asyncHandler((req, res) => {
+    try {
+        let middlewareUserResp = checkMiddlewareOutput(req);
 
-    let middlewareUserResp = checkMiddlewareOutput(req);
+        return res.status(200).json(new ApiResponse(201, "User Details", middlewareUserResp));
 
-    if(middlewareUserResp.name === 'TokenExpiredError') throw new ApiError(401, middlewareUserResp.message);
-
-    return res.status(200).json(new ApiResponse(201, "User Details", middlewareUserResp));
+    } catch (error) {
+        // If an error occurs in the try block or any called methods, we throw it to let asyncHandler catch and handle it automatically.
+        // This removes the need to manually handle the error here.
+        throw error;
+    }
 });
 
 

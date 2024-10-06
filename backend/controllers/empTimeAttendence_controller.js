@@ -7,37 +7,41 @@ const { checkMiddlewareOutput, findEmpDetail } = require("../utils/CommonMethod"
 // Here we get Details of Employee's punch. We save that records in db.
 // Remaining Part -> need to add the line for handle/send the error status.
 const saveTimeInTimeOut = asyncHandler(async (req, res) => {
-    let { timeIn, timeOut, dayhrs, timeentryId, timeEditReason } = req.body;
-
-    let currentUserDetails = checkMiddlewareOutput(req);
-
-    if (currentUserDetails.name === 'TokenExpiredError') throw new ApiError(401, currentUserDetails.message);
-
-    let empDetail = await findEmpDetail(currentUserDetails.UserId);
-
-    if (empDetail.ErrorMsg) throw new ApiError(401, empDetail.ErrorMsg);
-
-    let { Empnumber, EmpRole } = empDetail;
-
-    if (timeentryId) {
-
-        let updateData = await updateTimeEntry(timeentryId, { timeIn, timeOut, dayhrs, EmpRole, Empnumber, timeEditReason, ...currentUserDetails });
-
-        if (updateData.ErrorMsg) throw new ApiError(500, `${updateData.ErrorName} & ${updateData.ErrorMsg}`);
-
-        return res.status(200).json(new ApiResponse(201, "Time Added successfully", updateData));
+    try {
+        let { timeIn, timeOut, dayhrs, timeentryId, timeEditReason } = req.body;
+    
+        let currentUserDetails = checkMiddlewareOutput(req);
+    
+        let empDetail = await findEmpDetail(currentUserDetails.UserId);
+    
+        if (empDetail.ErrorMsg) throw new ApiError(401, empDetail.ErrorMsg);
+    
+        let { Empnumber, EmpRole } = empDetail;
+    
+        if (timeentryId) {
+    
+            let updateData = await updateTimeEntry(timeentryId, { timeIn, timeOut, dayhrs, EmpRole, Empnumber, timeEditReason, ...currentUserDetails });
+    
+            if (updateData.ErrorMsg) throw new ApiError(500, `${updateData.ErrorName} & ${updateData.ErrorMsg}`);  
+            // But need to check when I will run api error. Here we check if update time entry returns error. so catch got error or not. or we need to required add this line.
+    
+            return res.status(200).json(new ApiResponse(201, "Time Added successfully", updateData));
+        }
+    
+        let objTimeentry = {
+            TimeIn: timeIn,
+            Empnumber: empDetail.Empnumber,
+            createdBy: currentUserDetails.UserId,
+            IsDeleted: 0
+        }
+    
+        let addTimeentry = await db.EmployeeTimentry.create(objTimeentry);
+    
+        res.status(200).send(addTimeentry);
+    
+    } catch (error) {
+        throw error;
     }
-
-    let objTimeentry = {
-        TimeIn: timeIn,
-        Empnumber: empDetail.Empnumber,
-        createdBy: currentUserDetails.UserId,
-        IsDeleted: 0
-    }
-
-    let addTimeentry = await db.EmployeeTimentry.create(objTimeentry);
-
-    res.status(200).send(addTimeentry);
 
 });
 

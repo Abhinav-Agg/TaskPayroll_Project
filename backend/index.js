@@ -16,7 +16,7 @@ app.use(cookieParser());
 
 // Security Routes
 app.use("/api/v1/user/admin", userRouter);
-app.use("/api/v1/auth/user", userRouter);
+app.use("/api/v1/user/auth", userRouter);
 
 // routes
 app.use(getLoggedInUserDetails);

@@ -1,7 +1,6 @@
 var bcrypt = require('bcryptjs');
 const secretKey = require('./constants');
 const jwt = require("jsonwebtoken");
-const asyncHandler = require('./AsyncHandlerWrapper');
 const db = require('../db/dbModel');
 const ApiError = require('./ApiError');
 const { v4: uuidv4 } = require('uuid');
@@ -49,13 +48,12 @@ const verifyPassword = async (enteredPassword, userPassword) => {
 
 // This function returns the middleware output.
 const checkMiddlewareOutput = (req) => {
+    if(req.TokenError) throw new ApiError(500, "Invalid Token");
 
-    if(req.TokenError) return req.TokenError;
-
-    if(req.UserNotExistError) return req.UserNotExistError;
+    if(req.UserNotExistError) throw new ApiError(500, req.UserNotExistError);
 
     return req.user;
-}
+};
 
 const findEmpDetail = async (userId) => {
 

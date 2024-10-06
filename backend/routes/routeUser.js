@@ -5,7 +5,7 @@ const { login, createAdmin, reGenerateAccessTokenRefresh, currentUserDetails } =
 // Secure Routes
 router.route("/").get(currentUserDetails);
 router.route("/login").post(login);
-router.route("/refreshtoken").post(reGenerateAccessTokenRefresh);  // refresh token
+router.route("/refresh-token").post(reGenerateAccessTokenRefresh);  // refresh token
 
 // Admin API
 router.route("/createAdmin").post(createAdmin);  // Admin Create only with this API.
