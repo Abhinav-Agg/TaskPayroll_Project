@@ -3,7 +3,7 @@ const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/AsyncHandlerWrapper");
 const { where } = require("sequelize");
-const { generateToken, verifyPassword, hashPassword, generateRefreshToken, checkMiddlewareOutput } = require("../utils/CommonMethod");
+const { generateToken, verifyPassword, hashPassword, generateRefreshToken, checkMiddlewareCurrentUser } = require("../utils/CommonMethod");
 const jwt = require("jsonwebtoken");
 const secretKey = require("../utils/constants");
 
@@ -56,8 +56,8 @@ const rollbackData = async (userId) => {
     }
     catch (error) {
         res.status(500).send({
-            message : error.message,
-            Status : "Failure"
+            message: error.message,
+            Status: "Failure"
         })
     }
 }
@@ -88,8 +88,8 @@ const createUser = async (userObj) => {
 
     } catch (error) {
         res.status(500).send({
-            message : error.message,
-            Status : "Failure"
+            message: error.message,
+            Status: "Failure"
         })
     }
 };
@@ -128,8 +128,8 @@ const createUserRole = async (userId, role) => {
     } catch (error) {
         await rollbackData(userId);
         res.status(500).send({
-            message : error.message,
-            Status : "Failure"
+            message: error.message,
+            Status: "Failure"
         })
     }
 };
@@ -143,8 +143,8 @@ const createAdmin = async (req, res) => {
         if (!fullName || !email) throw new ApiError(401, "Fields Empty");
 
         let existingUser = await db.Users.findOne({ where: { UserEmail: email } });
-        
-        if (existingUser) return res.status(400).send({StatusCode : 401, ErrorMsg :  "User already exists" });
+
+        if (existingUser) return res.status(400).send({ StatusCode: 401, ErrorMsg: "User already exists" });
 
         // we use the default Password for Admin User -> AdminPass@123
         let newUserDetail = await db.Users.create({
@@ -173,60 +173,77 @@ const createAdmin = async (req, res) => {
     } catch (error) {
         await rollbackData(userIdForRollback);
         res.status(500).send({
-            message : error.message,
-            Status : "Failure"
+            message: error.message,
+            Status: "Failure"
         })
     }
 };
 
 
 // This method used for re-generateAccess token on the basis of refreshtoken. When Access Token has been expired , this api will hit from frontend.
-const reGenerateAccessTokenRefresh = asyncHandler(async (req, res) => {
-    let refreshToken = req.cookies.refreshToken
+const regenerateAccessTokenRefresh = async (req, res) => {
+    try {
+        let refreshToken = req.cookies.refreshToken;
 
-    if (!refreshToken) throw new ApiError(401, "Unauthorized user access");
+        if (!refreshToken) throw new ApiError(401, "Unauthorized user access");
 
-    let userIdFromRefreshToken = await jwt.verify(refreshToken, secretKey);
+        // Verify the refresh token using a promise-based approach
+        let userIdFromRefreshToken = await jwt.verify(refreshToken, secretKey);
 
-    let getUserDetail = await db.Users.findOne({ where: { UserId: userIdFromRefreshToken["userId"] } });
+        let getUserDetail = await db.Users.findOne({ where: { UserId: userIdFromRefreshToken["userId"] } });
 
-    if (!getUserDetail) throw new ApiError(401, "User not found");
+        if (!getUserDetail) throw new ApiError(401, "User not found");
 
-    // Here we validate the refresh token from db.
-    if (getUserDetail.RefreshToken !== refreshToken) throw new ApiError(401, "Unauthorized User");
+        //console.log(refreshToken);
+        //console.log(getUserDetail.RefreshToken);
 
-    let regenerateRefreshToken = generateRefreshToken(getUserDetail);
-    let regenerateAccessToken = generateToken(getUserDetail);
+        // Here we validate the refresh token from db.
+        if (getUserDetail.RefreshToken !== refreshToken) throw new ApiError(401, "Unauthorized User");
 
-    // Now update the refresh token and set the new token in Header.
-    await db.Users.update(
-        { RefreshToken: regenerateRefreshToken },
-        {
-            where: { UserId: getUserDetail.UserId }
-        }
-    );
+        let regenerateRefreshToken = generateRefreshToken(getUserDetail);
+        let regenerateAccessToken = generateToken(getUserDetail);
 
-    const options = {
-        httpOnly: true, // Prevents JavaScript access
-        secure: true, // Ensures cookie is sent over HTTPS
-        sameSite: 'Strict' // Prevents cross-site request forgery
-    }
-
-    res.setHeader("Authorization", `Bearer ${regenerateAccessToken}`);
-
-    return res.status(200)
-        .cookie("refreshToken", regenerateRefreshToken, options)
-        .send(
-            new ApiResponse(200, "Access Provided")
+        // Now update the refresh token and set the new token in Header.
+        await db.Users.update(
+            { RefreshToken: regenerateRefreshToken },
+            {
+                where: { UserId: getUserDetail.UserId }
+            }
         );
-});
+
+        const options = {
+            httpOnly: true, // Prevents JavaScript access
+            secure: true, // Ensures cookie is sent over HTTPS
+            sameSite: 'Strict' // Prevents cross-site request forgery
+        }
+
+        req.currentUserId = getUserDetail.UserId;
+
+        res.setHeader("Authorization", `Bearer ${regenerateAccessToken}`);
+
+        return res.cookie("refreshToken", regenerateRefreshToken, options);
+
+    } catch (err) {
+        // Handle JWT verification errors and other errors
+        if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+
+            req.refreshTokenError = {errorname : err.name}
+
+            return res.status(401).json({ message: "Invalid or expired refresh token", error: err.name });
+        }
+
+        // Generic error response
+        return res.status(500).json({ message: "Internal Server Error", error: err.message });
+    }
+};
 
 // This api returns the current user details with error.
 const currentUserDetails = asyncHandler((req, res) => {
     try {
-        let middlewareUserResp = checkMiddlewareOutput(req);
+        let currentUserDetails = checkMiddlewareCurrentUser(req);
+        console.log(currentUserDetails);
 
-        return res.status(200).json(new ApiResponse(201, "User Details", middlewareUserResp));
+        return res.status(200).json(new ApiResponse(201, "User Details", currentUserDetails));
 
     } catch (error) {
         // If an error occurs in the try block or any called methods, we throw it to let asyncHandler catch and handle it automatically.
@@ -243,6 +260,6 @@ module.exports = {
     createUserRole,
     rollbackData,
     createAdmin,
-    reGenerateAccessTokenRefresh,
+    regenerateAccessTokenRefresh,
     currentUserDetails
 };

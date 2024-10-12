@@ -1,7 +1,7 @@
 const { Op, where, Sequelize } = require("sequelize");
 const db = require("../db/dbModel");
 const asyncHandler = require("../utils/AsyncHandlerWrapper");
-const { checkMiddlewareOutput } = require("../utils/CommonMethod");
+const { checkMiddlewareCurrentUser } = require("../utils/CommonMethod");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 
@@ -9,7 +9,7 @@ const saveEmpTask = asyncHandler(async (req, res) => {
     try {
         let { TaskName, TaskDescription, Hrs } = req.body;
     
-        let currentUserDetails = checkMiddlewareOutput(req);
+        let currentUserDetails = checkMiddlewareCurrentUser(req);
     
         // This logic -> Any Emp only enter his details on one add or allow to add tasks.
         let { UserId, UserEmail } = currentUserDetails;
@@ -48,7 +48,7 @@ const updateEmpTask = asyncHandler(async (req, res) => {
     try {
         let { TaskName, TaskDescription, Hrs } = req.body;
     
-        let currentUserDetails = checkMiddlewareOutput(req);
+        let currentUserDetails = checkMiddlewareCurrentUser(req);
     
         let { UserId, UserEmail } = currentUserDetails;
     

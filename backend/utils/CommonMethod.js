@@ -47,10 +47,10 @@ const verifyPassword = async (enteredPassword, userPassword) => {
 }
 
 // This function returns the middleware output.
-const checkMiddlewareOutput = (req) => {
-    if(req.TokenError) throw new ApiError(500, "Invalid Token");
+const checkMiddlewareCurrentUser = (req) => {
+    if(req.refreshTokenError) throw new ApiError(500, req.refreshTokenError.errorname);
 
-    if(req.UserNotExistError) throw new ApiError(500, req.UserNotExistError);
+    if(req.refreshAccessToken?.statusMessage === "Internal Server Error") throw new ApiError(500, "Unauthorized User");
 
     return req.user;
 };
@@ -80,6 +80,6 @@ module.exports = {
     verifyPassword,
     validateEmpwithEmpNumber,
     generateRefreshToken,
-    checkMiddlewareOutput,
+    checkMiddlewareCurrentUser,
     findEmpDetail
 }
