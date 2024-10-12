@@ -4,7 +4,7 @@ const asyncHandler = require("../utils/AsyncHandlerWrapper");
 const { createUser, createUserRole } = require("./user_controller");
 const ApiResponse = require("../utils/ApiResponse");
 const { where, Op } = require("sequelize");
-const { checkMiddlewareOutput, validateEmpwithEmpNumber } = require("../utils/CommonMethod");
+const { checkMiddlewareCurrentUser, validateEmpwithEmpNumber } = require("../utils/CommonMethod");
 
 const createEmployee = asyncHandler(async (req, res) => {
     let { fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation, empRole } = req.body;
@@ -70,7 +70,7 @@ const updateEmployeeInfo = asyncHandler(async (req, res) => {
         // empNumber -> It will not update , its used for only validate the userDetails.
         let { empNumber, email, address, fullName, empRole, empDepartment, empDesignation } = req.body;
         
-        let currentUserDetails = checkMiddlewareOutput(req);
+        let currentUserDetails = checkMiddlewareCurrentUser(req);
     
         let { Role } = currentUserDetails;
     
