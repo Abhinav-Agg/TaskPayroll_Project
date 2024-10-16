@@ -7,6 +7,7 @@ const Leaves = require('../models/Leaves_model');
 const Task = require('../models/Task_model');
 const EmployeeTimentry = require('../models/EmployeeTimentry_model');
 const UserRole = require('../models/UserRole_model');
+const EmployeeLeaves = require('../models/EmployeeLeave_model');
 
 let db = {};
 
@@ -17,6 +18,7 @@ db.Leaves = Leaves(sequelize);
 db.Task = Task(sequelize);
 db.EmployeeTimentry = EmployeeTimentry(sequelize);
 db.UserRole = UserRole(sequelize);
+db.EmployeeLeaves = EmployeeLeaves(sequelize);
 
 Object.keys(db).forEach(modelName => {
     if (db[modelName].associate) {
