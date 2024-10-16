@@ -5,10 +5,18 @@ const asyncHandler = (func) => async (req, res, next) => {
         await func(req, res, next);
 
     } catch (error) {
-        res.status(500).send({
-            message : error.message,
-            Status : "Failure"
-        })
+        if(!error.statusCode){
+            res.status(500).send({
+                message : error.message,
+                Status : "Failure"
+            });
+        }
+        else{
+            res.status(error.statusCode).send({
+                message : error.message,
+                Status : "Failure"
+            });
+        }
     }
 }
 

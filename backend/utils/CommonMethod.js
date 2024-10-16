@@ -68,10 +68,10 @@ const findEmpDetail = async (userId) => {
 const validateEmpwithEmpNumber = async (empNumber) => {
 
     let empDetailsInstances = await db.Employee.findOne({where : {Empnumber : empNumber}});
-    
-    if(!empDetailsInstances) return res.status(400).send({"ErrorMsg" : "This employee not found"});
 
-    return empDetailsInstances;
+    let validEmpDetail = (!empDetailsInstances) ? {ErrorMsg : "This employee not found"} : empDetailsInstances;
+
+    return validEmpDetail;
 };
 
 module.exports = {

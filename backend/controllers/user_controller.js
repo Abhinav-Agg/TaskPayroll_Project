@@ -183,22 +183,19 @@ const createAdmin = async (req, res) => {
 // This method used for re-generateAccess token on the basis of refreshtoken. When Access Token has been expired , this api will hit from frontend.
 const regenerateAccessTokenRefresh = async (req, res) => {
     try {
-        let refreshToken = req.cookies.refreshToken;
+        let incomingRefreshToken = req.cookies.refreshToken;
 
-        if (!refreshToken) throw new ApiError(401, "Unauthorized user access");
+        if (!incomingRefreshToken) throw new ApiError(401, "Unauthorized user access");
 
         // Verify the refresh token using a promise-based approach
-        let userIdFromRefreshToken = await jwt.verify(refreshToken, secretKey);
+        let userIdFromRefreshToken = await jwt.verify(incomingRefreshToken, secretKey);
 
         let getUserDetail = await db.Users.findOne({ where: { UserId: userIdFromRefreshToken["userId"] } });
 
         if (!getUserDetail) throw new ApiError(401, "User not found");
 
-        //console.log(refreshToken);
-        //console.log(getUserDetail.RefreshToken);
-
         // Here we validate the refresh token from db.
-        if (getUserDetail.RefreshToken !== refreshToken) throw new ApiError(401, "Unauthorized User");
+        if (getUserDetail.RefreshToken !== incomingRefreshToken) throw new ApiError(401, "Unauthorized User");
 
         let regenerateRefreshToken = generateRefreshToken(getUserDetail);
         let regenerateAccessToken = generateToken(getUserDetail);

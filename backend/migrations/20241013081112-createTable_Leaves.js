@@ -10,23 +10,15 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true
       },
-      LeaveType: {
-        type: Sequelize.STRING(100),
-        allowNull: false
-      },
-      Empnumber: {
+      EmployeeLeaveId: {
         type: Sequelize.BIGINT,
-        allowNull: false
+        references: {
+          model: 'EmployeeLeaves', // Target model name (replace with your actual model)
+          key: 'EmployeeLeaveId' // Target model's primary key column (replace if different)
+        }
       },
-      LeavesGranted : {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      BalanceLeaves: {
-        type: Sequelize.INTEGER
-      },
-      ApprovedLeaves : {
-        type: Sequelize.INTEGER
+      LeaveType: {
+        type: Sequelize.STRING(100)
       },
       LeaveDays: {
         type: Sequelize.INTEGER
@@ -39,6 +31,12 @@ module.exports = {
       },
       LeaveReason: {
         type: Sequelize.STRING
+      },
+      BalanceLeaves: {
+        type: Sequelize.INTEGER
+      },
+      ApprovedLeaves : {
+        type: Sequelize.INTEGER
       },
       RejectedLeaves: {
         type: Sequelize.INTEGER
@@ -58,27 +56,23 @@ module.exports = {
       DeletedBy: {
         type: Sequelize.BIGINT
       },
-      // Add createdAt and updatedAt columns
       CreatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.Now
+        type: Sequelize.DATE
       },
       UpdatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
+        type: Sequelize.DATE
       }
     });
 
-    await queryInterface.addIndex('Leaves', ['Empnumber'], {
-      name: 'Leaves_empnumber_index',
-      unique: true, // To ensure the index is unique
+    await queryInterface.addIndex('Leaves', ['EmployeeLeaveId'], {
+      name: 'Leaves_employeeleaveId_index'
     });
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.removeIndex('Leaves', 'Leaves_empnumber_index');
+    await queryInterface.removeIndex('Leaves', 'Leaves_employeeleaveId_index');
 
     // Drop the Users table
     await queryInterface.dropTable('Leaves');
