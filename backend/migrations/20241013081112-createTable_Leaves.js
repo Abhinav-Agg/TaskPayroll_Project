@@ -35,11 +35,15 @@ module.exports = {
       BalanceLeaves: {
         type: Sequelize.INTEGER
       },
-      ApprovedLeaves : {
-        type: Sequelize.INTEGER
+      LeaveStatus : {
+        type : DataTypes.STRING(10),
+        allowNull : true
       },
-      RejectedLeaves: {
-        type: Sequelize.INTEGER
+      ApprovedBy : {
+        type: DataTypes.BIGINT
+      },
+      RejectedBy: {
+        type: DataTypes.BIGINT
       },
       RejectedReason: {
         type: Sequelize.STRING
