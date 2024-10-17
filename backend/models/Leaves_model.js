@@ -33,11 +33,15 @@ const model = (sequelize) => {
     BalanceLeaves: {
       type: DataTypes.INTEGER
     },
-    ApprovedLeaves : {
-      type: DataTypes.INTEGER
+    LeaveStatus : {
+      type : DataTypes.STRING(10),
+      allowNull : true
     },
-    RejectedLeaves: {
-      type: DataTypes.INTEGER
+    ApprovedBy : {
+      type: DataTypes.BIGINT
+    },
+    RejectedBy: {
+      type: DataTypes.BIGINT
     },
     RejectedReason: {
       type: DataTypes.STRING

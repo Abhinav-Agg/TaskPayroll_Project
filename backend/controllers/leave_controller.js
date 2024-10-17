@@ -105,7 +105,7 @@ const showLeavesDetails = asyncHandler(async(req, res) => {
     if(empDetail.ErrorMsg) throw new ApiError(401, empDetail.ErrorMsg);
     
     let getLeaveDetailsInstance = await Leaves.findAll({
-        attributes : ["LeaveType", "BalanceLeaves", "LeaveReason", "LeaveFromDate", "LeaveToDate", "ApprovedLeaves", "RejectedLeaves", "RejectedReason"],
+        attributes : ["LeaveType", "BalanceLeaves", "LeaveStatus", "LeaveReason", "LeaveFromDate", "LeaveToDate", "RejectedReason"],
         include : [{
             model : db.EmployeeLeaves,
             attributes : ["Empnumber", "LeavesGranted"],
@@ -122,8 +122,39 @@ const showLeavesDetails = asyncHandler(async(req, res) => {
 
 // Manager and HR_Admin
 const approveLeaves = asyncHandler(async(req, res) => {
-    // Here Manager will approve the leaves.
-    // Will do calcualtion for balance leaves when manager approved the leaves.
+    // Need to test this yet.....................
+    let {LeaveId} = req.params;
+
+    let currentUserDetails = checkMiddlewareCurrentUser(req);
+
+    if(currentUserDetails === "Employee") throw new ApiError(401, "You don't have access to approved leaves");
+
+    let getLeaveDetails = await Leaves.findAll({
+        where : {LeaveStatus : "REQ"}
+    });
+
+    if(!getLeaveDetails) return res.status(200).send(new ApiResponse(201, "No Leaves Pending for Approve"));
+
+    let {BalanceLeaves} = getLeaveDetails;
+
+    BalanceLeaves -= LeaveDays;
+
+    let leaveUpdateStatus = await Leaves.update(
+        {
+            LeaveStatus : "APV",
+            ApprovedBy : currentUserDetails.UserId,
+            BalanceLeaves,
+            ModifiedBy : currentUserDetails.UserId
+        },
+        {
+            where : {LeaveId}
+        }
+    );
+
+    if(leaveUpdateStatus[0] === 1)
+        return res.status(200).send(new ApiResponse(201, "Leave Approved"));
+
+    // Need to test this yet.....................
 });
 
 // Manager
@@ -143,5 +174,6 @@ const withdrawLeaves = asyncHandler(async(req, res) => {
 module.exports = {
     createEmployeesLeave,
     addLeaveRequest,
-    showLeavesDetails
+    showLeavesDetails,
+    approveLeaves
 }
