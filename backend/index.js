@@ -26,7 +26,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/task", taskRouter);
 app.use("/api/v1/emp", empRouter);
 app.use("/api/v1/leaves/admin",leaveRouter);
-app.use("/api/v1/leaves/emp",leaveRouter);
+app.use("/api/v1/leaves",leaveRouter);
 
 
 module.exports = app;
