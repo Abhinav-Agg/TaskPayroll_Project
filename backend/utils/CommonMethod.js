@@ -74,6 +74,26 @@ const validateEmpwithEmpNumber = async (empNumber) => {
     return validEmpDetail;
 };
 
+// Quick Sort
+const sorting = (arr) => {
+    let leftarr = [];
+    let rightarr = [];
+    let pivot = arr[0];  // assumed random element.
+
+    if(arr.length <= 0) return arr;
+
+    for(let i = 1; i < arr.length; i++){
+        if(arr[i] < pivot){
+            leftarr.push(arr[i]);
+        }
+        else{
+            rightarr.push(arr[i]);
+        }
+    }
+
+    return [...sorting(leftarr), pivot, ...sorting(rightarr)];  // Here we add pivot beacuse at end it will be a median because we take as starting element for ref.
+}
+
 module.exports = {
     generateToken,
     hashPassword,
@@ -81,5 +101,6 @@ module.exports = {
     validateEmpwithEmpNumber,
     generateRefreshToken,
     checkMiddlewareCurrentUser,
-    findEmpDetail
+    findEmpDetail,
+    sorting
 }
