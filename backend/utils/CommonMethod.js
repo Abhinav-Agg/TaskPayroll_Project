@@ -5,6 +5,7 @@ const db = require('../db/dbModel');
 const ApiError = require('./ApiError');
 const { v4: uuidv4 } = require('uuid');
 const { where } = require('sequelize');
+const fs = require('node:fs');
 
 const generateToken = (userDetail) => {
     const payload = {
@@ -74,6 +75,31 @@ const validateEmpwithEmpNumber = async (empNumber) => {
     return validEmpDetail;
 };
 
+// This function used for getting import files data.
+const readfileData = async (impFilepath) => {
+    // with promise class will achieve data from events.
+    return new Promise((resolve, reject) => {
+        const readableStream = fs.createReadStream(impFilepath, {
+            encoding : "utf-8"
+        });
+        
+        let data = ''; // Variable to store data from each chunk
+    
+        readableStream.on("data", (chunk) => {
+            data += chunk;
+            resolve(data)
+        });
+    
+        readableStream.on('end', () => {
+            resolve(data);
+        });
+
+        readableStream.on("error", (err) => {
+            reject(err);
+        });
+    });
+}
+
 // Quick Sort
 const sorting = (arr) => {
     let leftarr = [];
@@ -102,5 +128,6 @@ module.exports = {
     generateRefreshToken,
     checkMiddlewareCurrentUser,
     findEmpDetail,
+    readfileData,
     sorting
 }

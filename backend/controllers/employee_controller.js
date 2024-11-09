@@ -7,6 +7,7 @@ const { where, Op } = require("sequelize");
 const { checkMiddlewareCurrentUser, validateEmpwithEmpNumber } = require("../utils/CommonMethod");
 
 const createEmployee = asyncHandler(async (req, res) => {
+    // Userlogin will be Email/Empnumber. 
     let { fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation, empRole } = req.body;
 
     let reqsVal = [fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation, empRole].some(value => value === "");

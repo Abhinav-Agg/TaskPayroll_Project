@@ -70,27 +70,27 @@ const createUser = async (userObj) => {
 
         let existingUser = await db.Users.findOne({ where: { UserEmail: email } });
 
-        if (existingUser) throw new ApiError(401, "User already exists");
+        if (existingUser) throw new ApiError(403, "User already exists");
+
+        let usersHashPassword = await hashPassword(userPassword);
 
         let newUserDetail = await db.Users.create({
             Fullname: fullName,
             UserEmail: email,
             UserLogin: userLogin,
-            Password: await hashPassword(userPassword),
+            Password: usersHashPassword,
             IsActive: 1,
             Blocked: 0,
             IsDeleted: 0
         });
 
-        if (!newUserDetail) throw new ApiError(401, "Internal error");
-
         return newUserDetail;
 
     } catch (error) {
-        res.status(500).send({
+        return {
             message: error.message,
             Status: "Failure"
-        })
+        };
     }
 };
 
