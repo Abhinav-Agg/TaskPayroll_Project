@@ -55,10 +55,10 @@ const rollbackData = async (userId) => {
         return deleteUserDetails;
     }
     catch (error) {
-        res.status(500).send({
+        return {
             message: error.message,
             Status: "Failure"
-        })
+        }
     }
 }
 
@@ -127,10 +127,10 @@ const createUserRole = async (userId, role) => {
 
     } catch (error) {
         await rollbackData(userId);
-        res.status(500).send({
+        return{
             message: error.message,
             Status: "Failure"
-        })
+        }
     }
 };
 

@@ -94,12 +94,12 @@ const addBulkEmployee = asyncHandler(async(req, res) => {
     });
 
     if(eachUserRoleDetail.length === 0 && eachEmpDetail.length === 0){
-        return res.send(userDetails);
+        return res.status(200).json(new ApiResponse(201, "All Details are already in Database", userDetails));
     }
 
     let getnewEmpUserRoleDetails = await Promise.all(eachUserRoleDetail, db.Employee.bulkCreate(eachEmpDetail));
 
-    res.send({...userDetails, ...getnewEmpUserRoleDetails});
+    return res.status(200).json(new ApiResponse(201, "Data Imported Successfully", {...getnewEmpUserRoleDetails, ...userDetails}));
 });
 
 module.exports = {addBulkEmployee};
