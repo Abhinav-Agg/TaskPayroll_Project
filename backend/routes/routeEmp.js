@@ -13,4 +13,4 @@ router.route("/importemployees").post(upload.single('importEmp'), addBulkEmploye
 // Employee
 router.route("/timeentry").post(saveTimeInTimeOut);
 
-module.exports = router;
+module.exports = router; 

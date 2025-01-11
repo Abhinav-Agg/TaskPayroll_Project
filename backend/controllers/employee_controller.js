@@ -4,28 +4,11 @@ const asyncHandler = require("../utils/AsyncHandlerWrapper");
 const { createUser, createUserRole } = require("./user_controller");
 const ApiResponse = require("../utils/ApiResponse");
 const { where, Op } = require("sequelize");
-const { checkMiddlewareCurrentUser, validateEmpwithEmpNumber } = require("../utils/CommonMethod");
+const { validateEmpwithEmpNumber } = require("../utils/CommonMethod");
 
 const createEmployee = asyncHandler(async (req, res) => {
-    // Userlogin will be Email/Empnumber. 
     let { fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation, empRole } = req.body;
-
-    let reqsVal = [fullName, empNumber, email, address, userLogin, userPassword, empDepartment, empDesignation, empRole].some(value => value === "");
-
-    if (reqsVal) throw new ApiError(401, "field empty");
-
-    let existingEmp = await db.Employee.findOne({
-        where:
-        {
-            [Op.or]:
-                [
-                    { Email: email }, { Empnumber: empNumber }
-                ]
-        }
-    });
-
-    if (existingEmp) throw new ApiError(401, "Employee already exists");
-
+    
     let empObj = {
         FullName: fullName,
         Empnumber: empNumber,
@@ -71,7 +54,7 @@ const updateEmployeeInfo = asyncHandler(async (req, res) => {
         // empNumber -> It will not update , its used for only validate the userDetails.
         let { empNumber, email, address, fullName, empRole, empDepartment, empDesignation } = req.body;
         
-        let currentUserDetails = checkMiddlewareCurrentUser(req);
+        let currentUserDetails = req.user;
     
         let { Role } = currentUserDetails;
     
