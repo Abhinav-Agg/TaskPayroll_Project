@@ -8,6 +8,7 @@ const userRouter = require("./routes/routeUser");
 const empRouter = require("./routes/routeEmp");
 const taskRouter = require("./routes/routeTask");
 const leaveRouter = require("./routes/routeLeave");
+const {employeeValidation} = require("./middleware/validation");
 
 //middlewares
 app.use(cors());
@@ -21,7 +22,7 @@ app.use("/api/v1/user/auth", userRouter);
 
 // routes
 app.use(getLoggedInUserDetails);
-app.use("/api/v1/emp/admin", empRouter);
+app.use("/api/v1/emp/admin", employeeValidation, empRouter);
 app.use("/api/v1/emp", empRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/task", taskRouter);

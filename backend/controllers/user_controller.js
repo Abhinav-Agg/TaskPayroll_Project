@@ -97,8 +97,6 @@ const createUser = async (userObj) => {
 const changePassword = asyncHandler(async (req, res) => {
     let { email, newPassword, oldPassword } = req.body;
 
-    let { fullName, useremail, userId } = req.user;
-
     if (!email && !newPassword && !oldPassword) throw new ApiError(401, "Enter Value in field");
 
     let user = await db.Users.findOne({ where: { UserEmail: email } });

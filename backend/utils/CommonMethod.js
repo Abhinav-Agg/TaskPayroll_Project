@@ -47,15 +47,6 @@ const verifyPassword = async (enteredPassword, userPassword) => {
     return validPassword;
 }
 
-// This function returns the middleware output.
-const checkMiddlewareCurrentUser = (req) => {
-    if(req.refreshTokenError) throw new ApiError(500, req.refreshTokenError.errorname);
-
-    if(req.refreshAccessToken?.statusMessage === "Internal Server Error") throw new ApiError(500, "Unauthorized User");
-
-    return req.user;
-};
-
 const findEmpDetail = async (userId) => {
 
     const empDetail = await db.Employee.findOne({where : {UserId : userId}});
@@ -120,13 +111,13 @@ const sorting = (arr) => {
     return [...sorting(leftarr), pivot, ...sorting(rightarr)];  // Here we add pivot beacuse at end it will be a median because we take as starting element for ref.
 }
 
+//checkMiddlewareCurrentUser
 module.exports = {
     generateToken,
     hashPassword,
     verifyPassword,
     validateEmpwithEmpNumber,
     generateRefreshToken,
-    checkMiddlewareCurrentUser,
     findEmpDetail,
     readfileData,
     sorting
