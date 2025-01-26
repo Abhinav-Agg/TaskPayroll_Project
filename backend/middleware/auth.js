@@ -4,6 +4,7 @@ const secretKey = require("../utils/constants");
 const db = require("../db/dbModel");
 const { where, Op } = require("sequelize");
 const { regenerateAccessTokenRefresh } = require("../controllers/user_controller");
+const { getRoleId } = require("../utils/CommonMethod");
 
 const getLoggedInUserDetails = async (req, res, next) => {
     let token = req.headers["authorization"].replace("Bearer ", "") || req.cookies("Accesstoken");
@@ -31,7 +32,7 @@ const getLoggedInUserDetails = async (req, res, next) => {
 
             payloadUserRoleInstance = await db.UserRole.findOne(
                 {
-                    attributes: { exclude: ['created_at', 'updated_at'] },
+                    attributes: { exclude: ['created_at', 'updated_at' , 'UserRoleId'] },
                     where: { UserId: decode?.userId }
                 }
             );
@@ -47,20 +48,22 @@ const getLoggedInUserDetails = async (req, res, next) => {
 
             payloadUserRoleInstance = await db.UserRole.findOne(
                 {
-                    attributes: { exclude: ['created_at', 'updated_at'] },
+                    attributes: { exclude: ['created_at', 'updated_at', 'UserRoleId'] },
                     where: { UserId: req?.currentUserId }
                 }
             );
         }
-        
+
         if (!payloadUserDetailInstance) return req.UserNotExistError = "Unauthorized Access";
 
         // Get object from sequelize instances.
         // Sequelize Methods returns the instances not object. If we need object we need to use get method with Plain property Syntax used below.
-        const objUserDetails = payloadUserDetailInstance.get({ plain: true });
-        const objUserRoleDetails = payloadUserRoleInstance.get({ plain: true });
+        const objUserDetails = payloadUserDetailInstance?.get({ plain: true });
+        const objUserRoleDetails = payloadUserRoleInstance?.get({ plain: true });
 
-        req.user = { ...objUserDetails, ...objUserRoleDetails };
+        const roleId = getRoleId(objUserRoleDetails?.Role);
+
+        req.user = { ...objUserDetails, ...objUserRoleDetails, roleId };
     });
 
     if(req.refreshTokenError || req.refreshAccessToken?.statusMessage === "Internal Server Error") return;

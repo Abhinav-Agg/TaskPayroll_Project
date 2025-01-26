@@ -2,6 +2,7 @@ const asyncHandler = require("../utils/AsyncHandlerWrapper");
 const db = require("../db/dbModel");
 const { where, Op } = require("sequelize");
 const ApiError = require("../utils/ApiError");
+const { findEmpDetail } = require("../utils/CommonMethod");
 
 const employeeValidation = asyncHandler(async (req, res, next) => {
     // Userlogin will be Email/Empnumber. 
@@ -26,8 +27,25 @@ const employeeValidation = asyncHandler(async (req, res, next) => {
     next();
 });
 
-const LeaveValidation = (req, res, next) => {
+const valdiateLeaves = asyncHandler(async(req, res, next) =>{
 
-}
+});
+// const validateTimeentry = asyncHandler(async (req, res, next) => {
+//     let { timeIn, timeOut, dayhrs, timeentryId, timeEditReason } = req.body;
 
-module.exports = {employeeValidation, LeaveValidation};
+//     let {UserId, roleId} = req.user;
+
+//     let empDetail = await findEmpDetail(UserId);
+    
+//     if (empDetail.ErrorMsg) throw new ApiError(401, empDetail.ErrorMsg);
+
+//     let {Empnumber, EmpRole} = empDetail;
+
+//     req.TimeentryDetails = {
+//         timeIn, timeOut, dayhrs, timeentryId, timeEditReason, Empnumber, EmpRole, roleId
+//     }
+
+//     next();
+// });
+
+module.exports = {employeeValidation, valdiateLeaves};

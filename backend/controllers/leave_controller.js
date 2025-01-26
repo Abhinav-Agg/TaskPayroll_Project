@@ -12,9 +12,9 @@ const createEmployeesLeave = asyncHandler(async (req, res) => {
 
     let { empnumber, grantedLeaves, leaveEffectiveFrom, leaveEfectiveTo } = req.body;
 
-    let { UserId, Role } = req.user;
+    let { UserId, roleId } = req.user;
 
-    if (Role === "Manager" || Role === "Employee" || Role === "Operations") throw new ApiError(401, "You have not access to create Leaves");
+    if (roleId < 3) throw new ApiError(401, "You have not access to create Leaves");
 
     let currentSystemDate = new Date(currentDateTime.getTime() - currentDateTime.getTimezoneOffset() * 60000);  // With this logic we get current system's date.
 
@@ -49,6 +49,64 @@ const createEmployeesLeave = asyncHandler(async (req, res) => {
         .json(new ApiResponse(201, addedLeaveDetailsForEmp));
 });
 
+const updateLeavesOfEmployee = asyncHandler(async(req, res) => {
+    let currentDateTime = new Date();
+    
+    let {leaveEffectiveFrom, leaveEffectiveTo, leavesGranted, empnumber} = req.body;
+
+    let currentUser = req.user;
+
+    let { UserId, roleId } = currentUser;
+
+    if (roleId < 3) throw new ApiError(401, "You don't have access to approved leaves");
+
+    let empLeaveDetail = await db.EmployeeLeaves.findOne(
+        {
+            where: { Empnumber: empnumber }
+        }
+    );
+
+    let getLeaveDetails = await db.Leaves.findOne(
+        {
+            where: {EmployeeLeaveId : empLeaveDetail.EmployeeLeaveId, LeaveStatus : 'APV'},
+            order: [["UpdatedAt", "DESC"]]
+        }
+    );
+
+    let currentSystemDate = new Date(currentDateTime.getTime() - currentDateTime.getTimezoneOffset() * 60000);  // With this logic we get current system's date.
+
+    try{
+        db.EmployeeLeaves.update(
+            { IsActive : 0, LastBalanceLeaves : getLeaveDetails.BalanceLeaves, ModifiedBy : UserId},
+            {
+                where: {
+                    EmployeeLeaveId : empLeaveDetail.EmployeeLeaveId
+                }
+            }
+        );
+
+        let objEmpLeave = {
+            Empnumber: empnumber,
+            LeavesGranted: leavesGranted,
+            LeavesEffectiveFrom: leaveEffectiveFrom,
+            LeavesEffectiveTo: leaveEffectiveTo,
+            IsActive: 1,
+            IsDeleted: 0,
+            CreatedBy: UserId,
+            CreatedAt: currentSystemDate,
+            UpdatedAt: currentSystemDate
+        }
+    
+        let addedLeaveDetailsForEmp = await EmployeeLeaves.create(objEmpLeave);
+
+        return res.status(200).json(new ApiResponse(201, "Employee Leaves Updated", addedLeaveDetailsForEmp));
+    }
+    catch(err){
+        res.status(400).send(new ApiError(404, err.message));
+    }
+    
+});
+
 // Every Employees
 const addLeaveRequest = asyncHandler(async (req, res) => {
     let { leaveType, leaveDays, balanceLeaves, leaveFrom, leaveTo, leaveReason } = req.body;
@@ -62,7 +120,8 @@ const addLeaveRequest = asyncHandler(async (req, res) => {
     let empLeaveDetail = await EmployeeLeaves.findOne({
         where:
         {
-            Empnumber: empDetail.Empnumber, IsActive: 1,
+            Empnumber: empDetail.Empnumber, 
+            IsActive: 1,
             LeavesEffectiveFrom: {
                 [Op.lte]: new Date(leaveFrom)
             },
@@ -72,9 +131,27 @@ const addLeaveRequest = asyncHandler(async (req, res) => {
         }
     });
 
-    if (!empLeaveDetail) throw new ApiError(401, "Please contact your System Administrator for leaves expired or add leaves");
+    if (!empLeaveDetail) throw new ApiError(200, "Please contact your System Administrator for leaves expired or add leaves");
 
-    if (leaveDays > balanceLeaves) throw new ApiError(400, "Insufficient Balance Leaves");
+    if (leaveDays > balanceLeaves) throw new ApiError(200, "Insufficient Balance Leaves");
+
+    // Check overlapping condiition
+    let overlapLeaveDetails = await db.Leaves.findOne({
+        where : {
+            EmployeeLeaveId : empLeaveDetail.EmployeeLeaveId,
+            LeaveStatus : {
+                [Op.ne] : "REJ"
+            },
+            LeaveFromDate : {
+                [Op.lte] : new Date(leaveTo)
+            },
+            LeaveToDate : {
+                [Op.gte] : new Date(leaveFrom)
+            }
+        }
+    });
+
+    if(overlapLeaveDetails) throw new ApiError(200, "Requested Leave is overlapped with other leave");
 
     let leaveDetails = {
         EmployeeLeaveId: empLeaveDetail.EmployeeLeaveId,
@@ -90,13 +167,12 @@ const addLeaveRequest = asyncHandler(async (req, res) => {
 
     let leaveReqDetails = await Leaves.create(leaveDetails);
 
-    res.status(200).send(new ApiResponse(201, leaveReqDetails));
+    res.status(200).send(new ApiResponse(201, leaveReqDetails));    
 });
 
-// Every Employees -> This api shows only their details.
+// This Api shows Employee's leaves details
 const showLeavesDetails = asyncHandler(async (req, res) => {
-
-    let currentUserDetails = checkMiddlewareCurrentUser(req);
+    let currentUserDetails = req.user;
 
     let empDetail = await findEmpDetail(currentUserDetails.UserId);
 
@@ -109,28 +185,49 @@ const showLeavesDetails = asyncHandler(async (req, res) => {
             attributes: ["Empnumber", "LeavesGranted"],
             required: true,
             where: { Empnumber: empDetail.Empnumber }
-        }]
+        }],
+        order : [["UpdatedAt", "DESC"]]
     });
 
     let leaveDetails = getLeaveDetailsInstance.map(instance => instance.get({ plain: true }));
 
-    return res.send(new ApiResponse(201, "details", leaveDetails));
+    let currentLeaveBalance;
+
+    if(leaveDetails.length > 0){
+        currentLeaveBalance = leaveDetails[0].BalanceLeaves;
+        return res.send(new ApiResponse(201, "details", {leaveDetails , CurrentBalanceLeaves : currentLeaveBalance}));
+    }
+    else{
+        currentLeaveBalance = await db.EmployeeLeaves.findOne({
+            attributes : ["LeavesGranted"],
+            where: { Empnumber: empDetail.Empnumber }
+        });
+
+        return res.send(new ApiResponse(201, "details", {leaveDetails , CurrentBalanceLeaves : currentLeaveBalance.LeavesGranted}));
+    }
+
 });
 
 // Manager and HR_Admin
 const approveLeaves = asyncHandler(async (req, res) => {
-    let { leaveId, employeeLeaveId } = req.params;
+    let { empnumber, leaveId } = req.params;
 
-    let currentUserDetails = checkMiddlewareCurrentUser(req);
+    let currentUserDetails = req.user;
 
-    let { UserId, Role } = currentUserDetails;
+    let { UserId, roleId } = currentUserDetails;
 
-    if (Role === "Employee") throw new ApiError(401, "You don't have access to approved leaves");
+    if (roleId === 0) throw new ApiError(401, "You don't have access to approved leaves");
+
+    let empLeaveDetail = await db.EmployeeLeaves.findOne({
+        where : {
+            Empnumber : empnumber
+        }
+    });
 
     // By this we reduce the two calls in one call with OR condition.
-    let leaveDetails = await Leaves.findAll({
+    let leaveDetails = await db.Leaves.findAll({
         where : {
-            [Op.or] : [{LeaveStatus : "REQ", LeaveId: leaveId }, {LeaveStatus: "APV", EmployeeLeaveId: employeeLeaveId}]
+            [Op.or] : [{LeaveStatus : "REQ" }, {LeaveStatus: "APV", EmployeeLeaveId: empLeaveDetail.EmployeeLeaveId}]
         },
         order: [["UpdatedAt", "DESC"]] 
     });
@@ -161,29 +258,32 @@ const approveLeaves = asyncHandler(async (req, res) => {
             ModifiedBy: UserId
         },
         {
-            where: { LeaveId: leaveId }
+            where: { LeaveId: leaveId, EmployeeLeaveId : empLeaveDetail.EmployeeLeaveId }
         }
     );
 
-    if (leaveUpdateStatus[0] === 1)
+    if (leaveUpdateStatus[0] === 1){
         return res.status(200).send(new ApiResponse(201, "Leave Approved"));
-
+    }
+    else{
+        return res.status(200).send(new ApiResponse(201, "Something went wrong"));
+    }
 });
 
 // Manager -> Here manager also see details of other employees in manager setion leaves request module.
-const showRequestStatusLeaves = asyncHandler(async (req, res) => {
+const showEmployeesLeavesWithStatus = asyncHandler(async (req, res) => {
     const { UserId } = req.user;
 
     let empDetail = await findEmpDetail(UserId);
 
-    if (empDetail.EmpRole === "Employee") throw new ApiError(401, "You don't have access");
+    if (empDetail.roleId === 0) throw new ApiError(401, "You don't have access");
 
     const reqStatusLeaveDetails = await Leaves.findAll({
         attributes: ["LeaveId", "EmployeeLeaveId", "LeaveType", "LeaveStatus", "BalanceLeaves", "LeaveDays", "LeaveReason", "LeaveFromDate", "LeaveToDate"],
         include: [{
             model: db.EmployeeLeaves,
             required: true,
-            attributes: [], // Exclude all EmployeeLeaves columns
+            attributes: ["Empnumber"], 
             where: {
                 Empnumber: {
                     [Op.ne]: [empDetail.Empnumber]
@@ -202,7 +302,7 @@ const showRequestStatusLeaves = asyncHandler(async (req, res) => {
 const multipleApproveLeaves = asyncHandler(async (req, res) => {
     let { checkedLeaveIdsData } = req.body;
 
-    let currentUserDetails = checkMiddlewareCurrentUser(req);
+    let currentUserDetails = req.user;
 
     let { UserId } = currentUserDetails;
 
@@ -257,8 +357,36 @@ const multipleApproveLeaves = asyncHandler(async (req, res) => {
 
 // Manager
 const rejectLeaves = asyncHandler(async (req, res) => {
-    // Here Manager will reject the leaves.
-    // Will do calcualtion for balance leaves when manager rejected the leaves. We need to add those leaves in balance leaves.
+    let { empnumber, leaveId } = req.params;
+
+    let currentUserDetails = req.user;
+
+    let { UserId, roleId } = currentUserDetails;
+
+    if (roleId === 0) throw new ApiError(401, "You don't have access to reject leaves");
+
+    let empLeaveDetail = await db.EmployeeLeaves.findOne({
+        where : {
+            Empnumber : empnumber
+        }
+    });
+
+    let leaveUpdateStatus = await Leaves.update(
+        {
+            LeaveStatus: "REJ",
+            RejectedReason : "Due to some Work",
+            RejectedBy: UserId,
+            ModifiedBy: UserId
+        },
+        {
+            where: { LeaveId: leaveId, EmployeeLeaveId : empLeaveDetail.EmployeeLeaveId }
+        }
+    );
+
+    if (leaveUpdateStatus[0] === 1){
+        return res.status(200).send(new ApiResponse(201, "Leave Rejected"));
+    }
+    
 });
 
 // Employees
@@ -275,5 +403,7 @@ module.exports = {
     showLeavesDetails,
     approveLeaves,
     multipleApproveLeaves,
-    showRequestStatusLeaves
+    showEmployeesLeavesWithStatus,
+    rejectLeaves,
+    updateLeavesOfEmployee
 }

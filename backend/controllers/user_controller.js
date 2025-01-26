@@ -235,8 +235,7 @@ const regenerateAccessTokenRefresh = async (req, res) => {
 // This api returns the current user details with error.
 const currentUserDetails = asyncHandler((req, res) => {
     try {
-        let currentUserDetails = checkMiddlewareCurrentUser(req);
-        console.log(currentUserDetails);
+        let currentUserDetails = req.user;
 
         return res.status(200).json(new ApiResponse(201, "User Details", currentUserDetails));
 

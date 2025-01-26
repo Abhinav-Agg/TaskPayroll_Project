@@ -6,6 +6,7 @@ const ApiError = require('./ApiError');
 const { v4: uuidv4 } = require('uuid');
 const { where } = require('sequelize');
 const fs = require('node:fs');
+const rolesId = require('./RoleEnum');
 
 const generateToken = (userDetail) => {
     const payload = {
@@ -56,6 +57,10 @@ const findEmpDetail = async (userId) => {
     return checkEmpDetail;
 }
 
+const getRoleId = (role) => {
+    let roleId = rolesId[role];
+    return roleId;
+}
 
 const validateEmpwithEmpNumber = async (empNumber) => {
 
@@ -120,5 +125,6 @@ module.exports = {
     generateRefreshToken,
     findEmpDetail,
     readfileData,
+    getRoleId,
     sorting
 }

@@ -4,8 +4,10 @@ const { createEmployeesLeave,
     showLeavesDetails, 
     approveLeaves, 
     multipleApproveLeaves,
-    showRequestStatusLeaves
-     } = require("../controllers/leave_controller");
+    showEmployeesLeavesWithStatus,
+    rejectLeaves,
+    updateLeavesOfEmployee
+    } = require("../controllers/leave_controller");
 const router = express.Router();
 
 // Admin
@@ -13,10 +15,12 @@ router.route("/CreateLeaves").post(createEmployeesLeave);
 
 // Employee
 router.route("/AddRequest").post(addLeaveRequest);
-router.route("/ShowDetails").get(showLeavesDetails);
-router.route("/ApproveLeaves/:leaveId/:employeeLeaveId").post(approveLeaves);
+router.route("/showuserleavedetails").get(showLeavesDetails);
+router.route("/ApproveLeaves/:empnumber/:leaveId").post(approveLeaves);
+router.route("/rejectLeaves/:empnumber/:leaveId/").post(rejectLeaves);
 router.route("/ApproveLeaves").post(multipleApproveLeaves);
-router.route("/ShowReqStatusLeaves").get(showRequestStatusLeaves);
+router.route("/getEmployeesLeavesStatus").get(showEmployeesLeavesWithStatus);
+router.route("/updateEmployeeLeaves").post(updateLeavesOfEmployee);
 
 
 /*
