@@ -10,7 +10,7 @@ const { checkMiddlewareCurrentUser, readfileData} = require("../utils/CommonMeth
 const addBulkEmployee = asyncHandler(async(req, res) => {
     let {path} = req.file;
 
-    let currentUser = checkMiddlewareCurrentUser(req);
+    let currentUser = req.user;
 
     let myHeaderLength = 7; // Static length Its based on given Excel header
 

@@ -16,6 +16,10 @@ const model = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
+        LastBalanceLeaves : {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
         LeavesEffectiveFrom: {
             allowNull: false,
             type: DataTypes.DATE
